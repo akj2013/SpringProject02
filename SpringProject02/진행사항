@@ -20,3 +20,22 @@ org.apache.jasper.JasperException: 절대 URI인 [http://java.sun.com/jsp/jstl/c
 원인 : 말 그대로 jar 파일을 추가해주지 않아서 발생하였다.
 해결 : WEB-INF 폴더 하위에 lib 폴더를 만들고 jar 파일을 추가하였다.
 생각 : 왜 pom.xml에서 jar 파일을 설정하지 않고 WEB-INF에 넣는 것일까? 이 jar 파일들이 jsp에서만 사용되기 때문에 구분짓는 것인가?
+
+
+----- 10월 21일(월) -----
+[작업시간]
+	20:00 ~ 21:00 (1시간)
+
+[작업내용]
+1. CRUD 게시판 작성하기.
+	- 입력 화면 작성하기.
+	- 리스트 화면 작성하기.
+	
+[에러코드]
+1. ORA-28001: the password has expired
+	문제 : root-context.xml에서 사용하는 DB접속 아이디의 비밀번호가 만료되었다.
+	해결 : cmd창에서 sqlplus를 실행하여 새 비밀번호 설정 후 다시 접속하였다.
+
+[다음작업]
+1. SQLDeveloper 설치.
+2. 게시판 테이블 생성 및 삽입 서비스 구현.
