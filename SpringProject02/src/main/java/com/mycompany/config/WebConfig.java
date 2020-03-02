@@ -1,7 +1,9 @@
 package com.mycompany.config;
 
+import javax.servlet.Filter;
 import javax.servlet.ServletRegistration;
 
+import org.springframework.web.filter.CharacterEncodingFilter;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitializer {
@@ -29,5 +31,14 @@ public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitiali
 
 	}
 
+	@Override
+	protected Filter[] getServletFilters() {
+		CharacterEncodingFilter characterEncodingFileter =
+				new CharacterEncodingFilter();
+		characterEncodingFileter.setEncoding("UTF-8");
+		characterEncodingFileter.setForceEncoding(true);
+		
+		return new Filter[] { characterEncodingFileter };
+	}
 }
 
