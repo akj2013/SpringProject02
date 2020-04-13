@@ -2,6 +2,8 @@ package com.mycompany.mapper;
 
 import java.util.List;
 
+import org.apache.ibatis.annotations.Param;
+
 import com.mycompany.domain.BoardVO;
 import com.mycompany.domain.Criteria;
 
@@ -23,4 +25,6 @@ public interface BoardMapper {
 	public List<BoardVO> getListWithPaging(Criteria cri); // 페이징 처리
 	
 	public int getTotalCount(Criteria cri); // 전체 데이터 개수 처리
+	
+	public void updateReplyCnt(@Param("bno") Long bno, @Param("amount") int amount); 
 }
