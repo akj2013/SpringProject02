@@ -68,6 +68,9 @@
 				return true;
 			}
 			
+			// <input type='file'> DOM 요소를 초기화 시켜주기 위한 변수.
+			var cloneObj = $(".uploadDiv").clone();
+			
 			$("#uploadBtn").on("click", function(e) {
 				var formData = new FormData();
 				var inputFile = $("input[name='uploadFile']");
@@ -90,8 +93,11 @@
 					contentType: false,
 					data: formData,
 					type: 'POST',
+					dataType: 'json',
 					success: function(result) {
-						alert("Uploaded 11");
+						console.log(result);
+						// DOM 요소를 초기화
+						$(".uploadDiv").html(cloneObj.html());
 					}
 				}); //$.ajax
 			});
