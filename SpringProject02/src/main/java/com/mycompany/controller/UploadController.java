@@ -10,11 +10,13 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -207,5 +209,34 @@ public class UploadController {
 		// 결과 로그 출력
 		log.info("TOTAL : " + uploadFile.length + "건, " + "SUCCESS : " + successedFileCount + "건, " + "FAIL : " + failedFileCount + "건");
 		return new ResponseEntity<>(list, HttpStatus.OK);
+	}
+
+	/**
+	 * 특정한 파일 이름을 받아서 이미지 데이터를 전송한다.</br>
+	 * 문자열로 파일의 경로가 포함된 파라미터를 받아 byte[]를 전송한다.
+	 * 
+	 * @param fileName
+	 * @return ResponseEntity<byte[]> result
+	 */
+	@GetMapping("/display")
+	@ResponseBody
+	public ResponseEntity<byte[]> getFile(String fileName) {
+		log.info("display fileName : " + fileName);
+		File file = new File("c:\\upload\\" + fileName);
+		log.info("file : " + file);
+		ResponseEntity<byte[]> result = null;
+
+		try {
+			HttpHeaders header = new HttpHeaders();
+			/* 브라우저에 보내는 MIME 타입이 파일의 종류에 따라 달라질 수 있도록 'probeContentType'을 이용한다.
+			* MIME : Multipurpose Internet Mail Extensions
+			* 이메일과 함께 동봉할 파일을 텍스트 문자로 전환해서 이메일 시스템을 통해 전달하기 위해 사용하는 인코딩 타입.
+			*/
+			header.add("Content-Type", Files.probeContentType(file.toPath()));
+			result = new ResponseEntity<>(FileCopyUtils.copyToByteArray(file), header, HttpStatus.OK);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return result;
 	}
 }
