@@ -130,7 +130,7 @@
 						// 업로드할 파일의 섬네일을 보여준다.
 						showUploadedFile(result);
 						// DOM 요소를 초기화
-						$(".uploadDiv").html(cloneObj.html());
+						// $(".uploadDiv").html(cloneObj.html());
 						// $(".uploadResult").html(cloneObj.html());
 					}
 				}); //$.ajax
@@ -139,13 +139,15 @@
 			// uploadResult div에 업로드할 파일의 섬네일을 보여준다.
 			var uploadResult = $(".uploadResult ul");
 			function showUploadedFile(uploadResultArr) {
+				console.log("showUploadFile function");
 				var str = ""; // String이 없으니까 ""로 처리해준다.
 
 				$(uploadResultArr).each(
 					function(i, obj) {
 						// 이미지 파일이 아닌 경우, attach.png 파일을 섬네일로 보여준다.
 						if (!obj.image) {
-							str += "<li><img src='/spring/resources/img/attach.png'>" + obj.fileName + "</li>";
+							var fileCallPath = encodeURIComponent(obj.uploadPath + "/" + obj.uuid + "_" + obj.fileName);
+							str += "<li><a href='/spring/upload/download?fileName="+fileCallPath+"'>"+"<img src='/spring/resources/img/attach.png'>"+obj.fileName+"</a></li>";
 						// 이미지 파일인 경우, 이미지 파일을 섬네일로 보여준다.
 						} else {
 							// str += "<li>" + obj.fileName + "</li>";

@@ -3,6 +3,8 @@ package com.mycompany.controller;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.file.Files;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -10,6 +12,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -19,6 +23,7 @@ import org.springframework.ui.Model;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
@@ -27,7 +32,12 @@ import com.mycompany.domain.AttachFileDTO;
 
 import lombok.extern.log4j.Log4j;
 import net.coobird.thumbnailator.Thumbnailator;
-
+/**
+ * 파일의 업로드를 구현한 컨트롤러입니다.
+ * 
+ * @author akjak
+ *
+ */
 @Controller
 @RequestMapping("/upload/*")
 @Log4j
@@ -239,4 +249,69 @@ public class UploadController {
 		}
 		return result;
 	}
+
+	/**
+	 * 첨부파일의 다운로드를 처리합니다.
+	 * 첨부파일의 다운로드는 서버에서 MIME 타입을 다운로드 타입으로 지정하고, 적절한 헤더 메세지를 통해서 다운로드 이름을 지정하게 처리합니다.
+	 * 이미지와 달리 다운로드는 MIME 타입이 고정됩니다.
+	 * @param fileName
+	 * @return
+	 */
+	@GetMapping(value = "/download", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+	@ResponseBody
+	public ResponseEntity<Resource> downloadFile(@RequestHeader("User-Agent") String userAgent, String fileName) {
+		log.info("dowload file : " + fileName);
+
+		Resource resource = new FileSystemResource("c:\\upload\\" + fileName);
+		// 호출한 파일명의 파일이 존재하지 않는 경우, notFound를 보내고 이하의 처리는 생략한다.
+		if (resource.exists() == false) {
+			return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		}
+		
+		log.info("resource : " + resource);
+
+		String resourceName = resource.getFilename();
+		String resourceOriginalName = resourceName.substring(resourceName.indexOf("_") + 1);
+
+		 // HttpHeaders 객체를 이용해서 다운로드 시 파일의 이름을 처리한다.
+		HttpHeaders headers = new HttpHeaders();
+		try {
+			String downloadName = null;
+			
+			// 호출한 브라우저의 종류별로 처리한다. 종류에 따라 Content-Disposition의 값을 처리하는 인코딩 방식이 다르기 때문이다.
+			// IE
+			if (userAgent.contains("Trident")) { // Trident : IE 브라우저의 엔진 이름
+				log.info("IE browser");
+				downloadName = URLEncoder.encode(resourceOriginalName, "UTF-8").replaceAll("\\+", " ");
+				log.info("downloadName : " + downloadName);
+			// Edge
+			} else if (userAgent.contains("Edge")){
+				log.info("Edge browser");
+				downloadName = URLEncoder.encode(resourceOriginalName, "UTF-8");
+				log.info("downloadName : " + downloadName);
+			// Chrome
+			} else {
+				log.info("Chrome browser");
+				downloadName = new String(resourceOriginalName.getBytes("UTF-8"), "ISO-8859-1");
+				log.info("downloadName : " + new String(downloadName.getBytes("ISO-8859-1"), "UTF-8"));
+			}
+
+			headers.add("Content-Disposition", "attachment; filename=" + downloadName);
+			/**
+			 * HttpHeaders 정의
+			 * 
+			 * Parameters:
+			 * 		headerName the header name
+			 * 		headerValue the header value
+			 * 
+			 * Content-Disposition : 웹페이지에서 HTTP 프로토콜이 응답하는 데이터를 어떻게 표시하는지를 알려주는 Header
+			 * attachment : 사용자의 로컬에 다운로드할 수 있도록 해 준다.
+			 * 
+			 */
+		} catch(UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+		return new ResponseEntity<Resource>(resource, headers, HttpStatus.OK); // 순서대로 body, header, status를 담는다.
+	}
+	
 }
