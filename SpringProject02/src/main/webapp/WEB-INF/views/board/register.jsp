@@ -75,6 +75,17 @@
 		$("button[type='submit']").on("click", function(e) {
 			e.preventDefault();
 			console.log("submit clicked");
+			var str ="";
+			$(".uploadResult ul li").each(function(i, obj) {
+				var jobj = $(obj);
+				console.dir(jobj); // 인자로 넘어간 개체에 대해 모든 프로퍼티와 값들을 출력한다.
+
+				str += "<input type='hidden' name='attachList["+i+"].fileName' value='"+jobj.data("filename")+"'>";
+				str += "<input type='hidden' name='attachList["+i+"].uuid' value='"+jobj.data("uuid")+"'>";
+				str += "<input type='hidden' name='attachList["+i+"].uploadPath' value='"+jobj.data("path")+"'>";
+				str += "<input type='hidden' name='attachList["+i+"].fileType' value='"+jobj.data("type")+"'>";
+			});
+			formObj.append(str).submit();
 		});
 	});
 
@@ -132,18 +143,22 @@
 				// image type
 				if (obj.image) {
 					var fileCallPath = encodeURIComponent(obj.uploadPath+"/s_"+obj.uuid+"_"+obj.fileName);
-					str += "<li><div>";
+					str += "<li data-path='"+obj.uploadPath+"'";
+					str += " data-uuid='"+obj.uuid+"' data-filename='"+obj.fileName+"' data-type='"+obj.image+"'";
+					str += "><div>";
 					str += "<span> " + obj.fileName + "</span>";
-					str += "<button type='button' class='btn btn-warning btn-circle'><i class='fa fa-times'></li></button><br>";
+					str += "<button type='button' data-file=\'"+fileCallPath+"\' ";
+					str += "data-type='image' class='btn btn-warning btn-circle'><i class='fa fa-times'></li></button><br>";
 					str += "<img src='/spring/upload/display?fileName="+fileCallPath+"'>";
 					str += "</div>";
 					str += "</li>";
 				} else {
 					var fileCallPath = encodeURIComponent(obj.uploadPath+"/"+boj.uuid+"_"+obj.fileName);
 					var fileLink = fileCallPath.replace(new RegExp(/\\/g),"/");
-					str += "<li><div>";
+					str += "<li ";
+					str += "data-path='"+obj.uploadPath+"' data-uuid='"+obj.uuid+"' data-filename='"+obj.fileName+"' data-type='"+obj.image+"' ><div>";
 					str += "<span> " + obj.fileName + "</span>";
-					str += "<button type='button' class='btn btn-warning btn-circle'><i class='fa fa-times'></li></button><br>";
+					str += "<button type='button' data-file=\'"+fileCallPath+"\' data-type='file' class='btn btn-warning btn-circle'><i class='fa fa-times'></li></button><br>";
 					str += "<img src='/spring/resources/img/attach.png'></a>";
 					str += "</div>";
 					str += "</li>";
@@ -151,6 +166,29 @@
 			});
 			uploadUL.append(str);
 		}
+	});
+
+	// 첨부파일 변경 처리
+	// 'x' 아이콘을 클릭하면 서버에서 삭제하도록 이벤트 처리
+	// 브라우저에서 파일을 삭제하면 업로드된 파일도 같이 삭제된다.
+	$(".uploadResult").on("click", "button", function(e) {
+		console.log("delete file");
+
+		var targetFile = $(this).data("file");
+		var type = $(this).data("type");
+
+		var targetLi = $(this).closest("li");
+
+		$.ajax({
+			url: '/spring/upload/deleteFile',
+			data: {fileName: targetFile, type:type},
+			dataType:'text',
+			type:'POST',
+				success: function(result) {
+					alert(result);
+					targetLi.remove();
+				}
+		});
 	});
 </script>
 <%@include file="../includes/footer.jsp"%>

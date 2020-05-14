@@ -37,8 +37,12 @@ public class BoardController {
 		log.info("POST : board/register : " + board);
 		
 		service.register(board);
-		
-		rttr.addFlashAttribute("result", board.getBno());
+
+		// 넘어온 데이터 체크
+		if (board.getAttachList() != null) {
+			board.getAttachList().forEach(attach -> log.info(attach));
+		}
+//		rttr.addFlashAttribute("result", board.getBno());
 
 		System.out.println(board.getBno());
 		return "redirect:/board/list"; // redirect: 접두어를 사용하면 스프링 MVC가 내부적으로 response.sendRedirect()를 처리해 준다. 
