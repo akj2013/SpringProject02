@@ -41,6 +41,71 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- 첨부 파일이 보여질 영역 -->
+	<div class='bigPictureWrapper'>
+		<div class='bigPicture'>
+		</div>
+	</div>
+	<style>
+		.uploadResult {
+			width:100%;
+			background-color: gray;
+		}
+		.uploadResult ul {
+			display: flex;
+			flex-flow: row;
+			justify-content: center;
+			align-items: center;
+		}
+		.uploadResult ul li {
+			list-style: none;
+			padding: 10px;
+			align-content: center;
+			text-align: center;
+		}
+		.uploadResult ul li img {
+			width: 100px;
+		}
+		.uploadResult ul li span {
+			color: white;
+		}
+		.bigPictureWrapper {
+			position: absolute;
+			display: none;
+			justify-content: center;
+			align-items: center;
+			top: 0%;
+			width: 100%;
+			height: 100%;
+			background-color: gray;
+			z-index: 100;
+			background: rgba(255,255,255,0.5);
+		}
+		.bigPicture {
+			position: relative;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+		}
+		.bigPicture img {
+			width: 600px;
+		}
+	</style>
+
+	<div class="row">
+		<div class="col-lg-12">
+			<div class="panel panel-default">
+				<div class="panel-heading">Files</div>
+				<div class="panel-body">
+					<div class='uploadResult'>
+						<ul>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
 	
 	<div class='row'>
 		<div class="col-lg-12">
@@ -226,15 +291,15 @@
 //			replyService.getReplyCount(bnoValue, function(result) {
 //				alert("댓글 갯수 확인 함수 결과 : " + result);
 //			});
-			var addReply = {
-					reply : "아라비아",
-					replyer : "아자아자",
-					bno : bnoValue
-			}
+//			var addReply = {
+//					reply : "아라비아",
+//					replyer : "아자아자",
+//					bno : bnoValue
+//			}
 			
-			replyService.add(addReply, function(result) {
-				alert("댓글 자동 추가 이벤트 처리 결과 : " + result);
-			});
+//			replyService.add(addReply, function(result) {
+//				alert("댓글 자동 추가 이벤트 처리 결과 : " + result);
+//			});
 			// 댓글 페이지 번호를 출력하는 로직
 			var pageNum = 1;
 			var replyPageFooter = $(".panel-footer");
@@ -286,7 +351,6 @@
 			});
 		});
 	</script>
-	<!-- js 함수 호출 -->
 
 	<!-- 이벤트 처리 -->
 	<script type="text/javascript">
@@ -307,7 +371,69 @@
 				operForm.submit();
 			})
 		});
-
 	</script>
+
+	<!-- 첨부파일의 데이터를 가져오는 부분을 즉시 실행 함수를 이용해서 처리한다. -->
+	<script>
+		$(document).ready(function() {
+			(function() {
+				console.log("첨부파일의 데이터를 가져오는 즉시 실행 함수 시작");
+				var bno = '<c:out value="${board.bno}"/>';
+				$.getJSON("/spring/board/getAttachList", {bno: bno}, function(arr) {
+					console.log(arr);
+					var str = "";
+					$(arr).each(function(i, attach) {
+						// image type
+						if(attach.fileType) {
+							var fileCallPath = encodeURIComponent(attach.uploadPath+"/s_"+attach.uuid+"_"+attach.fileName);
+							str += "<li data-path='"+attach.uploadPath+"' data-uuid='"+attach.uuid+"' data-filename='"+attach.fileName+"' data-type='"+attach.fileType+"' ><div>";
+							str += "<img src='/spring/upload/display?fileName="+fileCallPath+"'>";
+							str += "</div>";
+							str += "</li>";
+						} else {
+							str += "<li data-path='"+attach.uploadPath+"' data-uuid='"+attach.uuid+"' data-filename='"+attach.fileName+"' data-type='"+attach.fileType+"' ><div>";
+							str += "<span> " + attach.fileName+"</span><br/>";
+							str += "<img src='/spring/resources/img/attach.png'>";
+							str += "</div>";
+							str += "</li>";
+						}
+					});
+					$(".uploadResult ul").html(str);
+				});
+			})();
+		});
+
+		// 첨부파일 클릭 시 이벤트 처리
+		// 원본 이미지나 파일을 다운로드하는 처리이다.
+		$(".uploadResult").on("click", "li", function(e) {
+			console.log("view image : 첨부파일 클릭 시 이벤트 처리이다.");
+			var liObj = $(this); // 현재의 li를 객체로 만든다.
+			var path = encodeURIComponent(liObj.data("path")+"/" + liObj.data("uuid")+"_" + liObj.data("filename"));
+			if (liObj.data("type")) {
+				showImage(path.replace(new RegExp(/\\/g),"/"));
+			} else {
+				// download
+				console.log("일반 파일은 다운로드를 실시합니다.");
+				self.location = "/spring/upload/download?fileName="+path;
+			}
+		});
+
+		// 첨부파일 이미지를 클릭했을 때 큰 화면으로 보여주는 함수
+		function showImage(fileCallPath) {
+			alert(fileCallPath);
+			$(".bigPictureWrapper").css("display", "flex").show();
+			$(".bigPicture").html("<img src='/spring/upload/display?fileName="+fileCallPath+"'>")
+				.animate({width:'100%',height:'100%'}, 1000);
+		}
+
+		// 원본 이미지 창 닫는 함수
+		$(".bigPictureWrapper").on("click", function(e) {
+			$("bigPicture").animate({width:'0%',height:'0%'}, 1000);
+			setTimeout(function() {
+				$('.bigPictureWrapper').hide();
+			}, 1000);
+		});
+	</script>
+	<!-- js 함수 호출 -->
 <%@include file="../includes/footer.jsp"%>
 

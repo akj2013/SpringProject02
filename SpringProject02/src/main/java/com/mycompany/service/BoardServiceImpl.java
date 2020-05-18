@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.mycompany.domain.BoardAttachVO;
 import com.mycompany.domain.BoardVO;
 import com.mycompany.domain.Criteria;
 import com.mycompany.mapper.BoardAttachMapper;
@@ -77,5 +78,11 @@ public class BoardServiceImpl implements BoardService{
 	public int getTotal(Criteria cri) {
 		log.info("get total count");
 		return mapper.getTotalCount(cri);
+	}
+
+	@Override
+	public List<BoardAttachVO> getAttachList(Long bno) {
+		log.info("get Attach List by bno" + bno);
+		return attachMapper.findByBno(bno);
 	}
 }

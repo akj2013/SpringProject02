@@ -1,5 +1,10 @@
 package com.mycompany.controller;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -7,8 +12,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.mycompany.domain.BoardAttachVO;
 import com.mycompany.domain.BoardVO;
 import com.mycompany.domain.Criteria;
 import com.mycompany.domain.PageDTO;
@@ -101,5 +108,20 @@ public class BoardController {
 		int total = service.getTotal(cri);
 		log.info("total : " + total);
 		model.addAttribute("pageMaker", new PageDTO(cri, total));
+	}
+
+	/**
+	 * 게시판에서 특정 게시물을 선택하였을 때,
+	 * 그 선택 게시물에 저장되어 있는 첨부파일을 가져와서
+	 * 화면으로 넘겨준다.
+	 * 
+	 * @param bno
+	 * @return 저장되어 있는 첨부파일의 리스트
+	 */
+	@GetMapping(value = "/getAttachList", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+	@ResponseBody
+	public ResponseEntity<List<BoardAttachVO>> getAttachList(Long bno) {
+		log.info("getAttachList " + bno);
+		return new ResponseEntity<>(service.getAttachList(bno), HttpStatus.OK);
 	}
 }
