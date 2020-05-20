@@ -1,5 +1,8 @@
 package com.mycompany.controller;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -76,13 +79,26 @@ public class BoardController {
 
 		return "redirect:/board/list";
 	}
-	
+
+	/**
+	 * 게시물을 삭제한다.
+	 * 첨부파일이 존재할 경우, 첨부파일을 DB에서 삭제한 후 폴더에서 파일을 삭제한다.
+	 * 
+	 * @param bno
+	 * @param cri
+	 * @param rttr
+	 * @return
+	 */
 	@PostMapping("/remove")
 	public String remove(@RequestParam("bno") Long bno, @ModelAttribute("cri") Criteria cri, RedirectAttributes rttr) {
-		
+
 		log.info("POST : board/remove : " + bno);
-		
-		if(service.remove(bno)) {
+
+		List<BoardAttachVO> attachList = service.getAttachList(bno);
+
+		if (service.remove(bno)) {
+			// 첨부파일을 삭제한다.
+			deleteFiles(attachList);
 			rttr.addFlashAttribute("result", "success");
 		}
 		
@@ -123,5 +139,32 @@ public class BoardController {
 	public ResponseEntity<List<BoardAttachVO>> getAttachList(Long bno) {
 		log.info("getAttachList " + bno);
 		return new ResponseEntity<>(service.getAttachList(bno), HttpStatus.OK);
+	}
+
+	/**
+	 * 폴더에 존재하는 첨부 파일을 삭제한다.
+	 * 
+	 * @param attachList
+	 */
+	private void deleteFiles(List<BoardAttachVO> attachList) {
+		if (attachList == null || attachList.size() == 0) {
+			return;
+		}
+
+		log.info("폴더에 존재하는 첨부 파일을 삭제합니다.");
+		log.info(attachList);
+
+		attachList.forEach(attach -> {
+			try {
+				Path file = Paths.get("C:\\upload\\" + attach.getUploadPath() + "\\" + attach.getUuid() + "_" + attach.getFileName());
+				Files.deleteIfExists(file);
+				if(Files.probeContentType(file).startsWith("image")) {
+					Path thumbNail = Paths.get("C:\\upload\\" + attach.getUploadPath() + "\\s_" + attach.getUuid() + "_" + attach.getFileName());
+					Files.delete(thumbNail);
+				}
+			} catch(Exception e) {
+				log.error("첨부파일의 삭제 과정에서 에러가 발생하였습니다. : " + e.getMessage());
+			}
+		});
 	}
 }

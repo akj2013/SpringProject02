@@ -39,4 +39,12 @@
 		WHERE
 			bno = #{bno}
 	</select>
+
+	<!-- 특정 게시물의 번호를 이용하여 첨부파일을 삭제한다. -->
+	<delete id="deleteAll">
+		DELETE
+			tbl_attach
+		WHERE
+			bno = #{bno}
+	</delete>
 </mapper>
