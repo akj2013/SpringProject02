@@ -47,4 +47,14 @@
 		WHERE
 			bno = #{bno}
 	</delete>
+
+	<!-- 어제 등록된 모든 파일을 가져오는 쿼리. -->
+	<select id="getOldFiles" resultType="com.mycompany.domain.BoardAttachVO">
+		SELECT
+			*
+		FROM
+			tbl_attach
+		WHERE
+			uploadpath = to_char(sysdate - 1, 'yyyy\mm\dd')
+	</select>
 </mapper>
