@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+	PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace = "com.mycompany.mapper.MemberMapper">
+	<!-- 해당 아이디로 비밀번호를 가져온다. -->
+	<select id="getUser" resultType="com.mycompany.domai.MemberVO">
+		SELECT
+			*
+		FROM
+			tbl_user
+		WHERE
+			username = #{username}
+	</select>
+</mapper>

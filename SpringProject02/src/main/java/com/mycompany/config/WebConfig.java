@@ -4,8 +4,12 @@ import javax.servlet.Filter;
 import javax.servlet.MultipartConfigElement;
 import javax.servlet.ServletRegistration;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.filter.CharacterEncodingFilter;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
+
+import com.mycompany.aop.JwtInterceptor;
 
 public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitializer {
 
@@ -44,5 +48,6 @@ public class WebConfig extends AbstractAnnotationConfigDispatcherServletInitiali
 		
 		return new Filter[] { characterEncodingFileter };
 	}
+
 }
 

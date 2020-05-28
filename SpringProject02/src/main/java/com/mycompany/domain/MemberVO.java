@@ -15,17 +15,8 @@ import lombok.Data;
  *
  */
 @Data
-public class AuthorizationVO extends UsernamePasswordAuthenticationToken {
+public class MemberVO {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
-
-	User user;
-
-	public AuthorizationVO (String id, String password, List<GrantedAuthority> grantedList, User user) {
-		super(id, password, grantedList);
-		this.user = user;
-	}
+	String username;
+	String password;
 }
